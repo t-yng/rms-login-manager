@@ -1,38 +1,9 @@
-// Enable chromereload by uncommenting this line:
-// import 'chromereload/devonly'
-
-class ShopLoginManager {
-    constructor() {
-        this.shopList = [
-            {
-                id: '1',
-                rLogin: {
-                    id:'testpartner921',
-                    password: 'njadm0013'
-                },
-                rakutenMember: {
-                    id: 'partner_259',
-                    password: '91BTHU7F'
-                }
-            }
-        ]    
-    }
-
-    getRLogin(shopId) {
-        const shop = this.shopList.find((shop) => shop.id === shopId);
-        return (shop !== undefined) ? shop.rLogin : null;
-    }
-
-    getRakutenMemberLogin(shopId) {
-        const shop = this.shopList.find((shop) => shop.id === shopId);
-        return (shop !== undefined) ? shop.rakutenMember : null;        
-    }
-}
+import LoginShopManager from '../libs/login-shop-manger';
 
 const createOptionElement = (option) => {
-    const optionElement = document.createElement('option')
+    const optionElement = document.createElement('option');
     optionElement.setAttribute('value', option.value);
-    optionElement.textContent = option.text
+    optionElement.textContent = option.text;
 
     return optionElement;
 }
@@ -43,7 +14,7 @@ const createSelectElement = (select, options) => {
     options.forEach((option) => {
         const optionElement = createOptionElement(option);
         selectElement.appendChild(optionElement);
-    })
+    });
 
     return selectElement;
 }
@@ -80,61 +51,64 @@ const addLoginShopListSelect = (shopListSelect) => {
     loginStep1.parentNode.insertBefore(shopListSelect, loginStep1);
 }
 
-const loginRLogin = (shopId) => {
+const loginRLogin = async (shopId) => {
     const rLoginIdInput = getRLoginIdInput();
     const rLoginPasswordInput = getRLoginPasswordInput();
-    const manager = new ShopLoginManager();
-    const rLogin  = manager.getRLogin(shopId);
-    rLoginIdInput.value = rLogin.id;
-    rLoginPasswordInput.value = rLogin.password;
+    const loginShop = await LoginShopManager.getLoginShop(shopId);
+    rLoginIdInput.value = loginShop.rLogin.id;
+    rLoginPasswordInput.value = loginShop.rLogin.password;
 }
 
-const loginRakutenMember = (shopId) => {
+const loginRakutenMember = async (shopId) => {
     const rLoginIdInput = getRakutenMemberLoginIdInput();
     const rLoginPasswordInput = getRakutenMemberLoginPasswordInput();
-    const manager = new ShopLoginManager();
-    const login  = manager.getRakutenMemberLogin(shopId);
-    rLoginIdInput.value = login.id;
-    rLoginPasswordInput.value = login.password;
+    const loginShop = await LoginShopManager.getLoginShop(shopId);
+    rLoginIdInput.value = loginShop.rakutenMember.id;
+    rLoginPasswordInput.value = loginShop.rakutenMember.password;
 }
 
-const createLoginShopList = () => {
+const createLoginShopList = async () => {
     // 店舗一覧のドロップボックスのDOM要素を生成
     const select = {name: 'shop-list'}
-    const options = [
+    const loginShops = await LoginShopManager.getLoginShops();
+    const initOptions = [
         {
             value: '',
             text: 'ログイン店舗を選択してくだい'
-        },
-        {
-            value: 1,
-            text: 'ぽんぽん'
-        },
-        {
-            value: 2,
-            text: 'ぽんぽん2'
         }
-    ]
+    ];
+    const loginShopOptions = loginShops.map((shop) => {
+        return {
+            value: shop.id,
+            text: shop.name    
+        }
+    })
+    const options = initOptions.concat(loginShopOptions);
+
     return createSelectElement(select, options);
 }
 
-if(isRLoginLogin()) {
-    // 値が選択された時にIDとパスワードに値を入力するコールバックを登録
-    const shopListSelect = createLoginShopList();
-    shopListSelect.addEventListener('change', () => {
-        loginRLogin(shopListSelect.value);
-        chrome.storage.local.set({'loginShopId': shopListSelect.value});
-    });
-    addLoginShopListSelect(shopListSelect)
-} else {
-    const shopListSelect = createLoginShopList();
-    chrome.storage.local.get(['loginShopId'], (result) => {
-        const loginShopId = result.loginShopId;
-        const selectedIndex = [...Array(shopListSelect.options.length)].findIndex((_, index) => {
-            return shopListSelect.options[index].value === loginShopId;
+const main = async () => {
+    if(isRLoginLogin()) {
+        // 値が選択された時にIDとパスワードに値を入力するコールバックを登録
+        const shopListSelect = await createLoginShopList();
+        shopListSelect.addEventListener('change', () => {
+            loginRLogin(shopListSelect.value);
+            chrome.storage.local.set({'loginShopId': shopListSelect.value});
+        });
+        addLoginShopListSelect(shopListSelect)
+    } else {
+        const shopListSelect = await createLoginShopList();
+        chrome.storage.local.get(['loginShopId'], (result) => {
+            const loginShopId = result.loginShopId;
+            const selectedIndex = [...Array(shopListSelect.options.length)].findIndex((_, index) => {
+                return shopListSelect.options[index].value === loginShopId;
+            })
+            shopListSelect.selectedIndex = selectedIndex;
+            loginRakutenMember(loginShopId);
         })
-        shopListSelect.selectedIndex = selectedIndex;
-        loginRakutenMember(loginShopId);
-    })
-    addLoginShopListSelect(shopListSelect);
+        addLoginShopListSelect(shopListSelect);
+    }    
 }
+
+main();

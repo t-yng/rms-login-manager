@@ -1,41 +1,25 @@
 import md5 from 'blueimp-md5';
+import LoginShopManager from '../libs/login-shop-manger';
 
 const setLoginShopForm = (loginShop) => {
-    document.getElementById('shop-name').value = loginShop.shopName;
+    document.getElementById('shop-name').value = loginShop.name;
     document.getElementById('r-login-id').value = loginShop.rLogin.id;
     document.getElementById('r-login-password').value = loginShop.rLogin.password;
     document.getElementById('rakuten-login-id').value = loginShop.rakutenMember.id;
     document.getElementById('rakuten-login-password').value = loginShop.rakutenMember.password;
 }
 
-const createNewLoginShop = () => {
-    return {
-        shopName: '',
-        rLogin: {
-            id: '',
-            password: ''
-        },
-        rakutenMember: {
-            id: '',
-            password: ''
-        }
-    }
-}
-
-const onSelectLoginShop = (loginShopId) => {
-    chrome.storage.sync.get(['loginShops'], (result) => {
-        let loginShop = result.loginShops.find((shop) => shop.shopId === loginShopId);
-        loginShop = (loginShop !== undefined) ? loginShop : createNewLoginShop();
-        setLoginShopForm(loginShop);
-    });
+const onSelectLoginShop = async (loginShopId) => {
+    const loginShop = await LoginShopManager.getLoginShop(loginShopId);
+    setLoginShopForm(loginShop);
 }
 
 const updateLoginShopsSelect = (loginShops) => {
     const select = document.querySelector('select[name="login-shop-list"]');
     loginShops.forEach((shop) => {
         let option = document.createElement('option');
-        option.setAttribute('value', shop.shopId);
-        option.textContent = shop.shopName;
+        option.setAttribute('value', shop.id);
+        option.textContent = shop.name;
         select.appendChild(option);
     });
     select.addEventListener('change', () => {
@@ -49,13 +33,12 @@ const getSelectedLoginShopId = () => {
     return (select.value !== '') ? select.value : null;
 }
 
-chrome.storage.sync.get(['loginShops'], (result) => {
-    const loginShops = (result.loginShops) ? result.loginShops : [];
+const main = async () => {
+    const loginShops = await LoginShopManager.getLoginShops();
     updateLoginShopsSelect(loginShops);
-})
+}
 
-document.getElementById('save-shop-login')
-.addEventListener('click', () => {
+const createLoginShopFromForm = () => {
     const shopName = document.getElementById('shop-name').value;
     const shopId   = md5(shopName);
     const rLoginId = document.getElementById('r-login-id').value;
@@ -63,9 +46,9 @@ document.getElementById('save-shop-login')
     const rakutenId = document.getElementById('rakuten-login-id').value;
     const rakutenPassword = document.getElementById('rakuten-login-password').value;
 
-    const loginInfo = {
-        shopName,
-        shopId,
+    return {
+        id: shopId,
+        name: shopName,
         rLogin: {
             id: rLoginId,
             password: rLoginPassword
@@ -75,18 +58,20 @@ document.getElementById('save-shop-login')
             password: rakutenPassword
         }
     }
+}
 
-    chrome.storage.sync.get(['loginShops'], (result) => {
-        let loginShops = (result.loginShops) ? result.loginShops : [];
-        const selectedLoginShopId = getSelectedLoginShopId();
+document.getElementById('save-shop-login')
+.addEventListener('click', async () => {
+    const loginShop = createLoginShopFromForm();
+    const selectedLoginShopId = getSelectedLoginShopId();
 
-        if(selectedLoginShopId === null) {
-            loginShops.push(loginInfo);
-        } else {
-            const index = loginShops.findIndex((shop) => shop.shopId === selectedLoginShopId);
-            loginShops[index] = loginInfo;
-        }
+    if(selectedLoginShopId === null) {
+        await LoginShopManager.insertLoginsShop(loginShop);
+    } else {
+        await LoginShopManager.updateLoginShop(selectedLoginShopId, loginShop);
+    }
 
-        chrome.storage.sync.set({loginShops}, () => alert('ログイン情報を保存しました。'));
-    });
+    alert('ログイン情報を保存しました。');
 })
+
+main();
