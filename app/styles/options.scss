@@ -1,9 +1,22 @@
-form {
+body {
+    height: 100%;
+    width: 100%;
+}
+
+.content-center {
+    display: flex;
+    justify-content: center;
+}
+
+.login-shop-form {
     width: 400px;
 }
 
-form label {
-    display: inline-block;
-    width: 130px;
-    text-align: right;
+.siimple-input {
+    box-sizing: border-box;
+}
+
+.full-justification {
+    display: flex;
+    justify-content: space-between;
 }

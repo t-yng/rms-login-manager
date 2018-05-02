@@ -3,39 +3,46 @@
 <head>
   <meta charset="utf-8" />
   <title>Options</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/siimple@3.0.0/dist/siimple.min.css">
   <link rel="stylesheet" type="text/css" href="../styles/options.css">
   <style>
   </style>
 </head>
 <body>
-  <select name="login-shop-list">
-    <option value="">-- ショップを追加 --</option>
-  </select>
-  <form action="">
-    <p>
-      <label for="">ショップ名：</label>
-      <input type="text" id="shop-name">
-    </p>
-    <p>
-      <label for="">R-Login ID：</label>
-      <input type="text" id="r-login-id">
-    </p>
-    <p>
-      <label for="">R-Login パスワード：</label>
-      <input type="password" id="r-login-password">
-    </p>
-    <p>
-      <label for="">楽天会員 ID：</label>
-      <input type="text" id="rakuten-login-id">
-    </p>
-    <p>
-      <label for="">楽天会員 パスワード：</label>
-      <input type="password" id="rakuten-login-password">
-    </p>
-    <p>
-      <button type="button" id="save-shop-login">保存</button>
-    </p>
-  </form>
+  <div class="siimple-content content-center">
+    <div class="login-shop-form siimple-form">
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">ログイン店舗</div>
+        <select name="login-shop-list" class="siimple-select siimple-select--fluid">
+          <option value="">-- ショップを追加 --</option>
+        </select>
+      </div>
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">店舗名</div>
+        <input type="text" id="shop-name" class="siimple-input siimple-input--fluid">
+      </div>
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">R-Login ID</div>
+        <input type="text" id="r-login-id" class="siimple-input siimple-input--fluid">
+      </div>
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">R-Login パスワード</div>
+        <input type="text" id="r-login-password" class="siimple-input siimple-input--fluid">
+      </div>
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">楽天会員 ID</div>
+        <input type="text" id="rakuten-login-id" class="siimple-input siimple-input--fluid">
+      </div>
+      <div class="siimple-form-field">
+        <div class="siimple-form-field-label">楽天会員 パスワード</div>
+        <input type="text" id="rakuten-login-password" class="siimple-input siimple-input--fluid">
+      </div>
+      <div class="siimple-form-field full-justification">
+        <div id="remove-shop-login" class="siimple-btn siimple-btn--red">店舗を削除</div>
+        <div id="save-shop-login" class="siimple-btn siimple-btn--green">保存</div>
+      </div>
+    </div>
+  </div>
   <script src="../scripts/options.js"></script>
 </body>
 </html>
