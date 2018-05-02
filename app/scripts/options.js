@@ -33,9 +33,31 @@ const getSelectedLoginShopId = () => {
     return (select.value !== '') ? select.value : null;
 }
 
+const saveLoginShop = async () => {
+    const loginShop = createLoginShopFromForm();
+    const selectedLoginShopId = getSelectedLoginShopId();
+
+    if(selectedLoginShopId === null) {
+        await LoginShopManager.insertLoginsShop(loginShop);
+    } else {
+        await LoginShopManager.updateLoginShop(selectedLoginShopId, loginShop);
+    }
+
+    alert('ログイン情報を保存しました。');
+}
+
+const deleteLoginShop = async () => {
+    const selectedLoginShopId = getSelectedLoginShopId();
+    await LoginShopManager.deleteLoginShop(selectedLoginShopId);
+    alert('ログイン情報を削除しました。');
+}
+
 const main = async () => {
     const loginShops = await LoginShopManager.getLoginShops();
     updateLoginShopsSelect(loginShops);
+
+    document.getElementById('save-login-shop').addEventListener('click', saveLoginShop);
+    document.getElementById('delete-login-shop').addEventListener('click', deleteLoginShop);
 }
 
 const createLoginShopFromForm = () => {
@@ -59,19 +81,5 @@ const createLoginShopFromForm = () => {
         }
     }
 }
-
-document.getElementById('save-shop-login')
-.addEventListener('click', async () => {
-    const loginShop = createLoginShopFromForm();
-    const selectedLoginShopId = getSelectedLoginShopId();
-
-    if(selectedLoginShopId === null) {
-        await LoginShopManager.insertLoginsShop(loginShop);
-    } else {
-        await LoginShopManager.updateLoginShop(selectedLoginShopId, loginShop);
-    }
-
-    alert('ログイン情報を保存しました。');
-})
 
 main();
