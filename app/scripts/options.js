@@ -9,27 +9,45 @@ const setLoginShopForm = (loginShop) => {
     document.getElementById('rakuten-login-password').value = loginShop.rakutenMember.password;
 }
 
+const clearLoginShopForm = () => {
+    document.getElementById('shop-name').value = '';
+    document.getElementById('r-login-id').value = '';
+    document.getElementById('r-login-password').value = '';
+    document.getElementById('rakuten-login-id').value = '';
+    document.getElementById('rakuten-login-password').value = '';
+}
+
+const getLoginShopsSelect = () => {
+    return document.querySelector('select[name="login-shop-list"]');
+}
+
 const onSelectLoginShop = async (loginShopId) => {
     const loginShop = await LoginShopManager.getLoginShop(loginShopId);
     setLoginShopForm(loginShop);
 }
 
 const updateLoginShopsSelect = (loginShops) => {
-    const select = document.querySelector('select[name="login-shop-list"]');
+    const select = getLoginShopsSelect();
+    const beforeSelectedIndex = select.selectedIndex;
+    select.innerHTML = '';
+
+    let option = document.createElement('option');
+    option.setAttribute('value', '');
+    option.textContent = '-- 店舗を追加 --';
+    select.appendChild(option);
+
     loginShops.forEach((shop) => {
         let option = document.createElement('option');
         option.setAttribute('value', shop.id);
         option.textContent = shop.name;
         select.appendChild(option);
     });
-    select.addEventListener('change', () => {
-        const selectedLoginShopId = select.value;
-        onSelectLoginShop(selectedLoginShopId);
-    })
+
+    select.selectedIndex = (beforeSelectedIndex >= 0) ? beforeSelectedIndex : 0;
 }
 
 const getSelectedLoginShopId = () => {
-    const select = document.querySelector('select[name="login-shop-list"]');
+    const select = getLoginShopsSelect();
     return (select.value !== '') ? select.value : null;
 }
 
@@ -72,6 +90,12 @@ const main = async () => {
     const loginShops = await LoginShopManager.getLoginShops();
     updateLoginShopsSelect(loginShops);
 
+    const select = getLoginShopsSelect();
+    select.addEventListener('change', () => {
+        const selectedLoginShopId = select.value;
+        onSelectLoginShop(selectedLoginShopId);
+    })
+
     document.querySelectorAll('.show-password').forEach((element) => {
         element.addEventListener('change', function() {
             const passwordInputId = this.getAttribute('data-for-input');
@@ -80,8 +104,26 @@ const main = async () => {
         })
     })
 
-    document.getElementById('save-login-shop').addEventListener('click', saveLoginShop);
-    document.getElementById('delete-login-shop').addEventListener('click', deleteLoginShop);
+    document.getElementById('save-login-shop').addEventListener('click', async () => {
+        await saveLoginShop();
+        const loginShops = await LoginShopManager.getLoginShops();
+        updateLoginShopsSelect(loginShops);
+
+        // 追加した店舗を選択状態にする
+        if(select.selectedIndex === 0) {
+            const lastSelectedIndex = select.options.length - 1;
+            select.selectedIndex = lastSelectedIndex;
+        }
+    });
+    document.getElementById('delete-login-shop').addEventListener('click', async () => {
+        await deleteLoginShop();
+        const loginShops = await LoginShopManager.getLoginShops();
+        updateLoginShopsSelect(loginShops);
+
+        // 店舗の選択状態を新規追加の状態にする
+        select.selectedIndex = 0;
+        clearLoginShopForm();
+    });
 }
 
 const createLoginShopFromForm = () => {
