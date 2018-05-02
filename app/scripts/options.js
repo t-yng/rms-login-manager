@@ -52,9 +52,33 @@ const deleteLoginShop = async () => {
     alert('ログイン情報を削除しました。');
 }
 
+const showPassword = (input) => {
+    input.type = 'text';
+}
+
+const hidePassword = (input) => {
+    input.type = 'password';
+}
+
+const togglePasswordDisplay = (input, shown) => {
+    if(shown) {
+        showPassword(input);
+    } else {
+        hidePassword(input);
+    }
+}
+
 const main = async () => {
     const loginShops = await LoginShopManager.getLoginShops();
     updateLoginShopsSelect(loginShops);
+
+    document.querySelectorAll('.show-password').forEach((element) => {
+        element.addEventListener('change', function() {
+            const passwordInputId = this.getAttribute('data-for-input');
+            const passwordInput = document.getElementById(passwordInputId);
+            togglePasswordDisplay(passwordInput, this.checked);
+        })
+    })
 
     document.getElementById('save-login-shop').addEventListener('click', saveLoginShop);
     document.getElementById('delete-login-shop').addEventListener('click', deleteLoginShop);
