@@ -20,7 +20,7 @@ const createSelectElement = (select, options) => {
 }
 
 const getLoginMainElement = () => {
-    return document.querySelector('[class*="rf-form-login--step-1"]');    
+    return document.querySelector('[class*="rf-form-login--step-1"]');
 }
 
 const getRLoginIdInput = () => {
@@ -80,7 +80,7 @@ const createLoginShopList = async () => {
     const loginShopOptions = loginShops.map((shop) => {
         return {
             value: shop.id,
-            text: shop.name    
+            text: shop.name
         }
     })
     const options = initOptions.concat(loginShopOptions);
@@ -99,6 +99,7 @@ const main = async () => {
         addLoginShopListSelect(shopListSelect)
     } else {
         const shopListSelect = await createLoginShopList();
+        shopListSelect.disabled = true;
         chrome.storage.local.get(['loginShopId'], (result) => {
             const loginShopId = result.loginShopId;
             const selectedIndex = [...Array(shopListSelect.options.length)].findIndex((_, index) => {
@@ -108,7 +109,7 @@ const main = async () => {
             loginRakutenMember(loginShopId);
         })
         addLoginShopListSelect(shopListSelect);
-    }    
+    }
 }
 
 main();
