@@ -116,13 +116,16 @@ const main = async () => {
         }
     });
     document.getElementById('delete-login-shop').addEventListener('click', async () => {
-        await deleteLoginShop();
-        const loginShops = await LoginShopManager.getLoginShops();
-        updateLoginShopsSelect(loginShops);
+        const label = select.options[select.selectedIndex].textContent;
+        if(confirm(`「${label}」のログイン情報を削除します。よろしいですか？`)) {
+            await deleteLoginShop();
+            const loginShops = await LoginShopManager.getLoginShops();
+            updateLoginShopsSelect(loginShops);
 
-        // 店舗の選択状態を新規追加の状態にする
-        select.selectedIndex = 0;
-        clearLoginShopForm();
+            // 店舗の選択状態を新規追加の状態にする
+            select.selectedIndex = 0;
+            clearLoginShopForm();
+        }
     });
 }
 
