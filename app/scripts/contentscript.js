@@ -8,9 +8,10 @@ const createOptionElement = (option) => {
     return optionElement;
 }
 
-const createSelectElement = (select, options) => {
+const createSelectElement = (options, attrubutes = {}) => {
     const selectElement = document.createElement('select');
-    selectElement.setAttribute('name', select.name);
+    selectElement.style.color = '#4D4D4D';
+    Object.keys(attrubutes).forEach((key) => selectElement.setAttribute(key, attrubutes[key]));
     options.forEach((option) => {
         const optionElement = createOptionElement(option);
         selectElement.appendChild(optionElement);
@@ -69,7 +70,6 @@ const loginRakutenMember = async (shopId) => {
 
 const createLoginShopList = async () => {
     // 店舗一覧のドロップボックスのDOM要素を生成
-    const select = {name: 'shop-list'}
     const loginShops = await LoginShopManager.getLoginShops();
     const initOptions = [
         {
@@ -85,7 +85,7 @@ const createLoginShopList = async () => {
     })
     const options = initOptions.concat(loginShopOptions);
 
-    return createSelectElement(select, options);
+    return createSelectElement(options);
 }
 
 const main = async () => {
